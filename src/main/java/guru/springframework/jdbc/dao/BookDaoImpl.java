@@ -19,16 +19,26 @@ public class BookDaoImpl implements BookDao {
 
     @Override
     public Book getById(Long id) {
-        return getEntityManager().find(Book.class, id);
+        EntityManager em = getEntityManager();
+        try {
+            return em.find(Book.class, id);
+        } finally {
+            em.close();
+        }
     }
 
     @Override
     public Book findBookByTitle(String title) {
-        TypedQuery<Book> query = getEntityManager().createQuery(
-                "SELECT b FROM Book b WHERE b.title = :title",
-                Book.class);
-        query.setParameter("title", title);
-        return query.getSingleResult();
+        EntityManager em = getEntityManager();
+        try {
+            TypedQuery<Book> query = em.createQuery(
+                    "SELECT b FROM Book b WHERE b.title = :title",
+                    Book.class);
+            query.setParameter("title", title);
+            return query.getSingleResult();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
@@ -39,7 +49,7 @@ public class BookDaoImpl implements BookDao {
         em.persist(book);
         em.flush();
         em.getTransaction().commit();
-
+        em.close();
         return book;
     }
 
@@ -51,8 +61,10 @@ public class BookDaoImpl implements BookDao {
         em.merge(book);
         em.flush();
         em.clear();
+        Book updated = em.find(Book.class, book.getId());
+        em.close();
 
-        return em.find(Book.class, book.getId());
+        return updated;
     }
 
     @Override
@@ -64,6 +76,7 @@ public class BookDaoImpl implements BookDao {
         em.remove(book);
         em.flush();
         em.getTransaction().commit();
+        em.close();
 
     }
 

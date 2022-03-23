@@ -1,6 +1,9 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Author;
+import guru.springframework.jdbc.domain.Book;
+import javassist.ByteArrayClassPath;
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
@@ -21,23 +24,26 @@ public class AuthorDaoImpl implements AuthorDao {
 
     @Override
     public Author getById(Long id) {
-//        Author author = getEntityManager().find(Author.class, id);
-//
-//        System.out.println(author.getFirstName());
+        EntityManager em = getEntityManager();
 
+        Author author = em.find(Author.class, id);
+        em.close();
 
-        return getEntityManager().find(Author.class, id);
+        return author;
     }
 
     @Override
     public Author findAuthorByName(String firstName, String lastName) {
-        TypedQuery<Author> query = getEntityManager().createQuery(
+        EntityManager em = getEntityManager();
+        TypedQuery<Author> query = em.createQuery(
                 "SELECT a FROM Author a WHERE a.firstName = :first_name AND a.lastName = :last_name",
                 Author.class);
         query.setParameter("first_name", firstName);
         query.setParameter("last_name", lastName);
 
-        return query.getSingleResult();
+        Author author = query.getSingleResult();
+        em.close();
+        return author;
     }
 
     @Override
@@ -48,6 +54,7 @@ public class AuthorDaoImpl implements AuthorDao {
         em.persist(author);
         em.flush();
         em.getTransaction().commit();
+        em.close();
 
         return author;
     }
@@ -61,7 +68,9 @@ public class AuthorDaoImpl implements AuthorDao {
         em.flush();
         em.clear();
 
-        return em.find(Author.class, author.getId());
+        Author updated = em.find(Author.class, author.getId());
+        em.close();
+        return updated;
     }
 
     @Override
@@ -72,6 +81,7 @@ public class AuthorDaoImpl implements AuthorDao {
         em.remove(author);
         em.flush();
         em.getTransaction().commit();
+        em.close();
     }
 
     private EntityManager getEntityManager() {
