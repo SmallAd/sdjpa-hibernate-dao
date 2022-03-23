@@ -62,6 +62,7 @@ public class BookDaoImpl implements BookDao {
         em.flush();
         em.clear();
         Book updated = em.find(Book.class, book.getId());
+        em.getTransaction().commit();
         em.close();
 
         return updated;
