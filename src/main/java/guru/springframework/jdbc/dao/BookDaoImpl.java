@@ -57,6 +57,18 @@ public class BookDaoImpl implements BookDao {
     }
 
     @Override
+    public Book findBookByTitleNative(String title) {
+        EntityManager em = getEntityManager();
+        try {
+            Query query = em.createNativeQuery("SELECT * FROM book b WHERE b.title = :title", Book.class)
+                    .setParameter("title", title);
+            return (Book) query.getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
     public Book findBookByTitleCriteria(String title) {
         EntityManager em = getEntityManager();
         try {
