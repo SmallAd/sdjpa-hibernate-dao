@@ -5,7 +5,11 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 
-@NamedQuery(name = "author_find_all", query = "FROM Author")
+@NamedQueries({
+        @NamedQuery(name = "find_by_name", query = "FROM Author a WHERE a.firstName = :first_name AND a.lastName = :last_name"),
+        @NamedQuery(name = "author_find_all", query = "FROM Author")
+})
+
 @Entity
 @Cacheable
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
