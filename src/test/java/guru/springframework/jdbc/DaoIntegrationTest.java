@@ -31,6 +31,13 @@ public class DaoIntegrationTest {
     BookDao bookDao;
 
     @Test
+    void testGetAuthorByNameCriteria() {
+        Author author = authorDao.findAuthorByNameCriteria("Craig", "Walls");
+
+        assertThat(author).isNotNull();
+    }
+
+    @Test
     void testFindAllBooks() {
         List<Book> books = bookDao.findAll();
 

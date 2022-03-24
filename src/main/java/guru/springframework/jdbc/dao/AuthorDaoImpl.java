@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.util.List;
 
 /**
@@ -60,6 +61,35 @@ public class AuthorDaoImpl implements AuthorDao {
         Author author = query.getSingleResult();
         em.close();
         return author;
+    }
+
+    @Override
+    public Author findAuthorByNameCriteria(String firstName, String lastName) {
+        EntityManager em = getEntityManager();
+
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            CriteriaQuery<Author> criteriaQuery = cb.createQuery(Author.class);
+
+            Root<Author> root = criteriaQuery.from(Author.class);
+
+            ParameterExpression<String> firstNameParameter = cb.parameter(String.class);
+            ParameterExpression<String> lastNameParameter = cb.parameter(String.class);
+
+            Predicate firstNamePredicate = cb.equal(root.get("firstName"), firstNameParameter);
+            Predicate lastNamePredicate = cb.equal(root.get("lastName"), lastNameParameter);
+
+            criteriaQuery.select(root).where(cb.and(firstNamePredicate, lastNamePredicate));
+
+            TypedQuery<Author> typedQuery = em.createQuery(criteriaQuery)
+                    .setParameter(firstNameParameter, firstName)
+                    .setParameter(lastNameParameter, lastName);
+
+
+            return typedQuery.getSingleResult();
+        } finally {
+            em.close();
+        }
     }
 
     @Override
